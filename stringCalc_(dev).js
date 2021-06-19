@@ -7,6 +7,7 @@ export default class StringCalc {
     static #rxSummPattern = /[a-z0]+\+[a-z0]+/i;       //pattern of addition expression.
     static #rxResultPattern = /^[a-z0]+$/i;            //pattern of desirable result final expression.
 
+
     //Regex for input validation, non valid input strings templates.
     static #rxValAlienChars = /[^\w\*\+\(\)]|_/;
     static #rxValStartEnd = /^[\*|\+].*$|^.*[\*|\+]$/;
@@ -16,7 +17,6 @@ export default class StringCalc {
     static #rxValOperandTypesCollision = /[a-z]\d|\d[a-z]/i;
     static #rxValIncorrectOps = /[a-z]\*[a-z]/i;
 
-    //checking open\close parentheses consistensy.
     static #parenthesisCountVal(str) {
         const openParenth = str.match(/\(/g);
         const closeParenth = str.match(/\)/g);
@@ -71,6 +71,10 @@ export default class StringCalc {
                 break;
         }
 
+        // debug.
+        console.log('String :' + string);
+        console.log('Multiplier :' + multiplier);
+
         //in case of multiplication string by 0 return zero character.
         if (!multiplier) return '0';
 
@@ -84,6 +88,10 @@ export default class StringCalc {
     }
 
     static #addResult(str) {
+
+        //debug
+        console.log('String with 0 :' + str);
+        console.log('Turns into :' + str.match(/[a-z]+/));
 
         //if one of operands is 0 - return only unchanged second operand.
         if (str.includes('0')) return str.match(/[a-z]+/);
@@ -101,17 +109,27 @@ export default class StringCalc {
     static #multResolve(str) {
         let newString = str;
 
+        //debug
+        console.log('Incoming to #multResolve() ' + newString);
+        console.log('PAttern ' + newString.match(this.#rxMultPattern)[0]);
+
         //while current operation patterns are present - replace each of them to their evaluated value.
         while (this.#rxMultPattern.test(newString)) {
             newString = newString
                 .replace(this.#rxMultPattern, this.#multResult(newString.match(this.#rxMultPattern)[0]));
         }
 
+        //debug
+        console.log('Result - ' + newString)
         return newString;
     }
 
     static #addResolve(str) {
         let newString = str;
+
+        //debug
+        console.log('Incoming to #addResolve() ' + newString);
+        console.log('PAttern ' + newString.match(this.#rxSummPattern)[0]);
 
         //while current operation patterns are present - replace each of them to their evaluated value.
         while (this.#rxSummPattern.test(newString)) {
@@ -119,11 +137,17 @@ export default class StringCalc {
                 .replace(this.#rxSummPattern, this.#addResult(newString.match(this.#rxSummPattern)[0]));
         }
 
+        //debug
+        console.log('Result - ' + newString)
         return newString;
     }
 
     static #parenthResolve(str) {
         let newString = str;
+
+        //debug
+        console.log('Incoming to #parenthResolve() ' + newString);
+        console.log('PAttern ' + newString.match(this.#rxParenthPattern)[0]);
 
         //while current operation patterns are present - replace each of them to their evaluated value.
         while (this.#rxParenthPattern.test(newString)) {
@@ -131,10 +155,10 @@ export default class StringCalc {
                 .replace(this.#rxParenthPattern, this.#parenthResult(newString.match(this.#rxParenthPattern)[0]));
         }
 
+        //debug
+        console.log('Result - ' + newString)
         return newString;
     }
-
-    // -------------------------  main interface method ------------------  //
 
     static evaluate(expr) {
         try {
@@ -168,6 +192,8 @@ export default class StringCalc {
                     this.#inputString = this.#parenthResolve(this.#inputString);
                 }
 
+                //debug
+                console.log('Final loop result: ' + this.#inputString);
             }
             return this.#inputString;
         }
@@ -177,3 +203,10 @@ export default class StringCalc {
         }
     }
 }
+
+// Метод должен принимать строку состоящую из букв и математических операций: “*” и “+”,
+// - например “(abc*3+trc)*2 и возвращать строку - результат операций(abcabcabctrcabcabcabctrc).
+// В случае получения неправильного аргумента выдавать ошибку.
+
+
+// |\(([^ ()] *) \(|\) ([^ ()] *) \)

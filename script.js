@@ -21,6 +21,8 @@ function clickHandlerClear() {
 refs.buttonCalc.addEventListener('click', clickHandlerCalc);
 refs.buttonClear.addEventListener('click', clickHandlerClear);
 
+console.log(StringCalc.rxResultPattern);
+
 // Метод должен принимать строку состоящую из букв и математических операций: “*” и “+”,
 // - например “(abc * 3 + trc) * 2 и возвращать строку - результат операций(abcabcabctrcabcabcabctrc).
 // В случае получения неправильного аргумента выдавать ошибку.
