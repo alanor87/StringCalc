@@ -90,8 +90,12 @@ export default class StringCalc {
     static #addResult(addExpr) {
         const splitExpr = addExpr.split('+');
 
+        //cheking type of operands
+        const opOneIsNumber = !Number.isNaN(Number(splitExpr[0]));
+        const opTwoIsNumber = !Number.isNaN(Number(splitExpr[1]));
+
         //if one of operands is 0 - return only unchanged second operand from pure input.
-        if (splitExpr.includes('0')) {
+        if ((!opOneIsNumber || !opTwoIsNumber) && splitExpr.includes('0')) {
 
             //debug
             console.log('String with 0 :' + addExpr);
@@ -99,9 +103,6 @@ export default class StringCalc {
             return addExpr.match(/[a-z]+/);
         }
 
-        //cheking type of operands
-        const opOneIsNumber = !Number.isNaN(Number(splitExpr[0]));
-        const opTwoIsNumber = !Number.isNaN(Number(splitExpr[1]));
 
         //case of number - number addition.
         if (opOneIsNumber & opTwoIsNumber) {
