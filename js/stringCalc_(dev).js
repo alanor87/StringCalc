@@ -14,6 +14,7 @@ export default class StringCalc {
     static #rxValOpRepeats = /\+\+|\*\*/;
     static #rxValParentheses = /\(\)|\(\(|\)\)|\w\(/i;
     static #rxValOpParenthCollision = /\([+*]|[+*]\)/;
+    static #rxValOpCollision = /\+\*|\*\+/i;
     static #rxValOperandTypesCollision = /[a-z]\d|\d[a-z]/i;
     static #rxValIncorrectOps = /[a-z]\*[a-z]|^[a-z]+\+\d+$|^\d+\+[a-z]+$/i; // work on  it!
 
@@ -31,6 +32,7 @@ export default class StringCalc {
             this.#rxValOpRepeats.test(str),
             this.#rxValParentheses.test(str),
             this.#rxValOpParenthCollision.test(str),
+            this.#rxValOpCollision.test(str),
             this.#rxValOperandTypesCollision.test(str),
             this.#rxValIncorrectOps.test(str),
             this.#parenthesisCountVal(str)
