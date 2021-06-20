@@ -4,8 +4,9 @@ export default class StringCalc {
     static #inputString = '';                          //input string initial value.
     static #rxParenthPattern = /\(\w+\)/i;             //pattern of parentheses expression.
     static #rxMultPattern = /\w+\*\w+/i;               //pattern of multiplication expression.
-    static #rxSummPattern = /[a-z0]+\+[a-z0]+/i;       //pattern of addition expression.
-    static #rxResultPattern = /^[a-z0]+$/i;            //pattern of desirable result final expression.
+    static #rxSummPattern = /\w+\+\w+(?!\w*\*)/i;      //pattern of addition expression, not valid if theres multiplication ahead.
+    static #rxResultPattern = /^\w+$/i;                //pattern of desirable result final expression.
+
 
     //Regex for input validation, non valid input strings templates.
     static #rxValAlienChars = /[^\w\*\+\(\)]|_/;
@@ -14,9 +15,8 @@ export default class StringCalc {
     static #rxValParentheses = /\(\)|\(\(|\)\)|\w\(/i;
     static #rxValOpParenthCollision = /\([+*]|[+*]\)/;
     static #rxValOperandTypesCollision = /[a-z]\d|\d[a-z]/i;
-    static #rxValIncorrectOps = /[a-z]\*[a-z]/i;
+    static #rxValIncorrectOps = /[a-z]\*[a-z]|^[a-z]+\+\d+$|^\d+\+[a-z]+$/i; // work on  it!
 
-    //checking open\close parentheses consistensy.
     static #parenthesisCountVal(str) {
         const openParenth = str.match(/\(/g);
         const closeParenth = str.match(/\)/g);
@@ -54,7 +54,7 @@ export default class StringCalc {
         };
 
         //error in case if letters - letters multiplication op is encountered during parse.
-        if (!opOneIsNumber & !opTwoIsNumber) throw new Error('Invalid operation!');
+        if (!opOneIsNumber & !opTwoIsNumber) throw new Error('Invalid operation - letter to letter multiplication!');
 
         let string = '';
         let multiplier = '';
@@ -71,6 +71,10 @@ export default class StringCalc {
                 break;
         }
 
+        // debug.
+        console.log('String :' + string);
+        console.log('Multiplier :' + multiplier);
+
         //in case of multiplication string by 0 return zero character.
         if (!multiplier) return '0';
 
@@ -83,13 +87,33 @@ export default class StringCalc {
         return newString;
     }
 
-    static #addResult(str) {
+    static #addResult(addExpr) {
+        const splitExpr = addExpr.split('+');
 
-        //if one of operands is 0 - return only unchanged second operand.
-        if (str.includes('0')) return str.match(/[a-z]+/);
+        //if one of operands is 0 - return only unchanged second operand from pure input.
+        if (splitExpr.includes('0')) {
+
+            //debug
+            console.log('String with 0 :' + addExpr);
+            console.log('Turns into :' + addExpr.match(/[a-z]+/));
+            return addExpr.match(/[a-z]+/);
+        }
+
+        //cheking type of operands
+        const opOneIsNumber = !Number.isNaN(Number(splitExpr[0]));
+        const opTwoIsNumber = !Number.isNaN(Number(splitExpr[1]));
+
+        //case of number - number addition.
+        if (opOneIsNumber & opTwoIsNumber) {
+            const summ = Number(splitExpr[0]) + Number(splitExpr[1]);
+            return String(summ);
+        };
 
         //return concatenated string operands.
-        return str.split('+').join('');
+        if (!opOneIsNumber & !opTwoIsNumber) return splitExpr.join('');
+
+        //error in case both number and letters operands present.
+        throw new Error('Invalid operation - letter and number addition!');
     }
 
     static #parenthResult(str) {
@@ -101,17 +125,27 @@ export default class StringCalc {
     static #multResolve(str) {
         let newString = str;
 
+        //debug
+        console.log('Incoming to #multResolve() ' + newString);
+        console.log('PAttern ' + newString.match(this.#rxMultPattern)[0]);
+
         //while current operation patterns are present - replace each of them to their evaluated value.
         while (this.#rxMultPattern.test(newString)) {
             newString = newString
                 .replace(this.#rxMultPattern, this.#multResult(newString.match(this.#rxMultPattern)[0]));
         }
 
+        //debug
+        console.log('Result - ' + newString)
         return newString;
     }
 
     static #addResolve(str) {
         let newString = str;
+
+        //debug
+        console.log('Incoming to #addResolve() ' + newString);
+        console.log('PAttern ' + newString.match(this.#rxSummPattern)[0]);
 
         //while current operation patterns are present - replace each of them to their evaluated value.
         while (this.#rxSummPattern.test(newString)) {
@@ -119,11 +153,17 @@ export default class StringCalc {
                 .replace(this.#rxSummPattern, this.#addResult(newString.match(this.#rxSummPattern)[0]));
         }
 
+        //debug
+        console.log('Result - ' + newString)
         return newString;
     }
 
     static #parenthResolve(str) {
         let newString = str;
+
+        //debug
+        console.log('Incoming to #parenthResolve() ' + newString);
+        console.log('PAttern ' + newString.match(this.#rxParenthPattern)[0]);
 
         //while current operation patterns are present - replace each of them to their evaluated value.
         while (this.#rxParenthPattern.test(newString)) {
@@ -131,17 +171,17 @@ export default class StringCalc {
                 .replace(this.#rxParenthPattern, this.#parenthResult(newString.match(this.#rxParenthPattern)[0]));
         }
 
+        //debug
+        console.log('Result - ' + newString)
         return newString;
     }
-
-    // -------------------------  main interface method ------------------  //
 
     static evaluate(expr) {
         try {
 
             //error thrown on empty input string.
             if (!expr) {
-                throw 'Invalid input!';
+                throw new Error('Invalid input - string is empty!');
             }
 
             //getting rid of possible spaces.
@@ -168,6 +208,8 @@ export default class StringCalc {
                     this.#inputString = this.#parenthResolve(this.#inputString);
                 }
 
+                //debug
+                console.log('Final loop result: ' + this.#inputString);
             }
             return this.#inputString;
         }
@@ -177,3 +219,11 @@ export default class StringCalc {
         }
     }
 }
+
+
+// Метод должен принимать строку состоящую из букв и математических операций: “*” и “+”,
+// - например “(abc*3+trc)*2 и возвращать строку - результат операций(abcabcabctrcabcabcabctrc).
+// В случае получения неправильного аргумента выдавать ошибку.
+
+
+// |\(([^ ()] *) \(|\) ([^ ()] *) \)
