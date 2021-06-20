@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./css/main.css" />
     <title>Document</title>
-</head>
-<body>
-    <input class="my-input" type="text" value="(abc*3+trc)*2*(abc*3+trc)">
-    <button class="my-button-calc" type="button">calc</button>
-    <button class="my-button-clear" type="button">clear</button>
-    <p class="my-result"></p>
+  </head>
+  <body>
+    <div class="wrapper">
+        <h1 class="header">String calc</h1>
+      <div class="input">
+        <input class="my-input" type="text" />
+        <button class="my-button-calc" type="button">calc</button>
+        <button class="my-button-clear" type="button">clear</button>
+      </div>
+      <div class="output">
+        <p class="result"><span>Result : </span><span class="my-result"></span></p>
+      </div>
+    </div>
     <script type="module" src="./js/script.js"></script>
-</body>
+  </body>
 </html>
